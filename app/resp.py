@@ -97,10 +97,10 @@ class Encoder:
                     del sg_dict[key]
                 return self._encode_bulk_string(None)
             
-            case [b'RPUSH', list, value]:
+            case [b'RPUSH', list, *value]:
                 if list not in sg_dict:
                     sg_dict[list] = RedisValue(data=[], expires_at=None)
-                sg_dict[list].data.append(value)
+                sg_dict[list].data.extend(value)
                 return self._encode_integer(len(sg_dict[list].data))
             
             case _:
