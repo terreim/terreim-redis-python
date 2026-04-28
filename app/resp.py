@@ -106,20 +106,20 @@ class Encoder:
             case _:
                 return self._encode_error(b'ERR unknown command')
             
-    def _encode_simple_string(s: bytes) -> bytes:
+    def _encode_simple_string(self, s: bytes) -> bytes:
         return b'+' + s + b'\r\n'
 
-    def _encode_bulk_string(s: bytes | None) -> bytes:  # None → b"$-1\r\n"
+    def _encode_bulk_string(self, s: bytes | None) -> bytes:  # None → b"$-1\r\n"
         if s is None:
             return b'$-1\r\n'
         return b'$' + str(len(s)).encode() + b'\r\n' + s + b'\r\n'
 
-    def _encode_array(items: list[bytes]) -> bytes:
+    def _encode_array(self, items: list[bytes]) -> bytes:
         pass
 
-    def _encode_integer(n: int) -> bytes:
+    def _encode_integer(self, n: int) -> bytes:
         return b':' + str(n).encode() + b'\r\n'
 
-    def _encode_error(msg: bytes) -> bytes:
+    def _encode_error(self, msg: bytes) -> bytes:
         return b'-' + msg + b'\r\n'
 
