@@ -1,6 +1,6 @@
 import socket  # noqa: F401
 import selectors
-import time
+from datetime import datetime, timedelta
 
 from .exception import IncompleteData
 
@@ -103,12 +103,12 @@ def read(conn: socket.socket, mask: int) -> None:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
 
             case [b'SET', key, value, options, rest]:
-                sg_dict[key] = (value, time.now() + int(rest) if options.upper() == b'EX' else time.now() + int(rest) / 1000)
+                sg_dict[key] = (value, datetime.now() + timedelta(seconds=int(rest)) if options.upper() == b'EX' else datetime.now() + timedelta(milliseconds=int(rest)))
                 conn.sendall(b'+OK\r\n')
                 
             case [b'GET', key]:
                 print(sg_dict)
-                if key in sg_dict and sg_dict[key][1] > time.now():
+                if key in sg_dict and sg_dict[key][1] > datetime.now():
                     conn.sendall(b'$' + str(len(sg_dict[key][0])).encode() + b'\r\n' + sg_dict[key][0] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
