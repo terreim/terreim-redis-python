@@ -6,7 +6,7 @@ from .exception import IncompleteData
 
 sel = selectors.DefaultSelector()
 data_buffer = {}
-setget_dict = {}
+sg_dict = {}
 
 def accept(sock: socket.socket, mask: int) -> None:
     conn, addr = sock.accept()
@@ -103,18 +103,19 @@ def read(conn: socket.socket, mask: int) -> None:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
 
             case [b'SET', key, value, options, rest]:
-                setget_dict[key] = value
+                sg_dict[key] = value
+                print(sg_dict)
                 conn.sendall(b'+OK\r\n')
                 if options.upper() == b'EX':
                     time.sleep(int(rest))
-                    del setget_dict[key]
+                    del sg_dict[key]
                 elif options.upper() == b'PX':
                     time.sleep(int(rest) / 1000)
-                    del setget_dict[key]
+                    del sg_dict[key]
                 
             case [b'GET', key]:
-                if key in setget_dict:
-                    conn.sendall(b'$' + str(len(setget_dict[key])).encode() + b'\r\n' + setget_dict[key] + b'\r\n')
+                if key in sg_dict:
+                    conn.sendall(b'$' + str(len(sg_dict[key])).encode() + b'\r\n' + sg_dict[key] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
 
