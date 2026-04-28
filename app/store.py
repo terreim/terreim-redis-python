@@ -60,8 +60,17 @@ def lrange(key, start, stop) -> list[bytes]:
     
     return v.data[start:stop]
 
-def lpop(key, count=1) -> bytes | list[bytes] | None: # Implement later
-    pass
+def lpop(key, count=1) -> bytes | list[bytes] | None:
+    v = _check_alive(key)
+    if v is None or len(v.data) == 0: return None
+    if not isinstance(v, ListValue): raise WrongTypeError(f"Key {key} is not a list")
+    
+    if count == 1:
+        return v.data.pop(0)
+    else:
+        popped = v.data[:count]
+        del v.data[:count]
+        return popped
 
 def llen(key) -> int:
     v = _check_alive(key)

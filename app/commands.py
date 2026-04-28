@@ -17,16 +17,22 @@ def dispatch(command: list[bytes]) -> bytes:
         case [b'ECHO', msg]:
             return encode_bulk_string(msg)
 
-        case [b'SET', key, value]:
-            set_string(key, value)
-            return encode_simple_string(b'OK')
+        case [b'SET', key, value, *tail]:
+            if not tail:
+                set_string(key, value)
+                return encode_simple_string(b'OK')
 
-        case [b'SET', key, value, option, rest]:
-            if option.upper() == b'EX':
-                set_string(key, value, expiry=timedelta(seconds=int(rest)))
-            elif option.upper() == b'PX':
-                set_string(key, value, expiry=timedelta(milliseconds=int(rest)))
-            return encode_simple_string(b'OK')
+            if len(tail) == 2:
+                option, rest = tail
+                option = option.upper()
+                if option == b'EX':
+                    set_string(key, value, expiry=timedelta(seconds=int(rest)))
+                    return encode_simple_string(b'OK')
+                if option == b'PX':
+                    set_string(key, value, expiry=timedelta(milliseconds=int(rest)))
+                    return encode_simple_string(b'OK')
+
+            return encode_error(b'ERR syntax error')
             
         case [b'GET', key]:
             value = get_string(key)
@@ -39,6 +45,20 @@ def dispatch(command: list[bytes]) -> bytes:
         
         case [b'LPUSH', key, *value]:
             return encode_integer(lpush(key, *value))
+        
+        case [b'LPOP', key, *tail]:
+            if tail > 1:
+                return encode_error(b'ERR syntax error')
+            
+            cnt = 1 if len(tail) == 0 else int(tail[0])
+            popped = lpop(key, count=cnt)
+            if popped is None:
+                return encode_bulk_string(None)
+            elif isinstance(popped, list):
+                return encode_array([encode_bulk_string(v) for v in popped])
+            else:
+                return encode_bulk_string(popped)
+            
         
         case [b'LRANGE', key, start, stop]:
             start_idx = int(start)
