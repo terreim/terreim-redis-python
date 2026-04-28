@@ -37,6 +37,9 @@ def dispatch(command: list[bytes]) -> bytes:
         case [b'RPUSH', key, *value]:
             return encode_integer(rpush(key, *value))
         
+        case [b'LPUSH', key, *value]:
+            return encode_integer(lpush(key, *value))
+        
         case [b'LRANGE', key, start, stop]:
             start_idx = int(start)
             stop_idx = int(stop)
