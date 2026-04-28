@@ -103,12 +103,16 @@ def read(conn: socket.socket, mask: int) -> None:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
 
             case [b'SET', key, value, options, rest]:
-                sg_dict[key] = (value, datetime.now() + timedelta(seconds=int(rest)) if options.upper() == b'EX' else datetime.now() + timedelta(milliseconds=int(rest)))
+                if options in (b'EX', b'PX'):
+                    sg_dict[key] = (value, datetime.now() + timedelta(seconds=int(rest)) if options.upper() == b'EX' else datetime.now() + timedelta(milliseconds=int(rest)))
+                else:
+                    sg_dict[key] = (value, None)
                 conn.sendall(b'+OK\r\n')
                 
             case [b'GET', key]:
-                print(sg_dict)
-                if key in sg_dict and sg_dict[key][1] > datetime.now():
+                if key in sg_dict and sg_dict[key][1] and sg_dict[key][1] > datetime.now():
+                    conn.sendall(b'$' + str(len(sg_dict[key][0])).encode() + b'\r\n' + sg_dict[key][0] + b'\r\n')
+                elif key in sg_dict and sg_dict[key][1] is None:
                     conn.sendall(b'$' + str(len(sg_dict[key][0])).encode() + b'\r\n' + sg_dict[key][0] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
