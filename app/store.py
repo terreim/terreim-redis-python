@@ -50,10 +50,9 @@ def lrange(key, start, stop) -> list[bytes]:
     v = _check_alive(key)
     if v is None: return []
     if not isinstance(v, ListValue): raise WrongTypeError(f"Key {key} is not a list")
-    try:
-        return v.data[start:stop]
-    except IndexError:
-        
+    
+    return v.data[start:stop]
+
 
 def lpop(key, count=1) -> bytes | list[bytes] | None: # Implement later
     pass
