@@ -97,7 +97,7 @@ def read(conn: socket.socket, mask: int) -> None:
             case [b'PING']:
                 conn.sendall(b'+PONG\r\n')
             case [b'ECHO', msg]:
-                conn.sendall(b'+' + msg + b'\r\n')
+                conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
             case _:
                 conn.sendall(b'-ERR unknown command\r\n')
 
