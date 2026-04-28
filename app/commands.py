@@ -49,7 +49,7 @@ def dispatch(command: list[bytes]) -> bytes:
             if start_idx >= list_len or start_idx >= stop_idx:
                 return encode_array([])
             
-            return encode_array(lrange(key, start_idx, stop_idx))
+            return encode_array([encode_bulk_string(v) for v in lrange(key, start_idx, stop_idx)])
         
         case [b'LLEN', key]:
             return encode_integer(llen(key))
