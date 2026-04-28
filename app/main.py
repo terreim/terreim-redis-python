@@ -114,6 +114,8 @@ def read(conn: socket.socket, mask: int) -> None:
             case [b'GET', key]:
                 if key in sg_dict and sg_dict[key][1] and sg_dict[key][1] > datetime.now():
                     conn.sendall(b'$' + str(len(sg_dict[key][0])).encode() + b'\r\n' + sg_dict[key][0] + b'\r\n')
+                elif key in sg_dict and sg_dict[key][1] is None:
+                    conn.sendall(b'$' + str(len(sg_dict[key][0])).encode() + b'\r\n' + sg_dict[key][0] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
 
