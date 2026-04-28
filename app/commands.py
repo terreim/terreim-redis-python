@@ -47,7 +47,7 @@ def dispatch(command: list[bytes]) -> bytes:
             return encode_integer(lpush(key, *value))
         
         case [b'LPOP', key, *tail]:
-            if tail > 1:
+            if len(tail) > 1:
                 return encode_error(b'ERR syntax error')
             
             cnt = 1 if len(tail) == 0 else int(tail[0])
