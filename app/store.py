@@ -43,8 +43,15 @@ def rpush(key, *values) -> int:
         raise WrongTypeError(f"Key {key} is not a list")
     return len(_keyspace[key].data)
 
-def lpush(key, *values) -> int: # Implement later
-    pass
+def lpush(key, *values) -> int:
+    v = _check_alive(key)
+    if v is None:
+        _keyspace[key] = ListValue(data=list(values), expires_at=None)
+    elif isinstance(v, ListValue):
+        v.data[0:0] = values[::-1]
+    else:
+        raise WrongTypeError(f"Key {key} is not a list")
+    return len(_keyspace[key].data)
 
 def lrange(key, start, stop) -> list[bytes]:
     v = _check_alive(key)
