@@ -114,6 +114,8 @@ def read(conn: socket.socket, mask: int) -> None:
                     del sg_dict[str(key)]
                 
             case [b'GET', key]:
+                if isinstance(key, bytes):
+                    print(f"GET command received for key: {key.decode()}")
                 if str(key) in sg_dict:
                     conn.sendall(b'$' + str(len(sg_dict[str(key)])).encode() + b'\r\n' + sg_dict[str(key)] + b'\r\n')
                 else:
