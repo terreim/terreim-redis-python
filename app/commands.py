@@ -9,8 +9,6 @@ from .resp import (
 )
 from .store import get_string, set_string, rpush, lpush, lrange, lpop, llen
 
-encoder = Encoder()
-
 def dispatch(command: list[bytes]) -> bytes:
     match command:
         case [b'PING']:
