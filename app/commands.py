@@ -54,3 +54,6 @@ def dispatch(command: list[bytes]) -> bytes:
         case [b'LLEN', key]:
             return encode_integer(llen(key))
         
+        case _:
+            return encode_error(b'ERR unknown command')
+        

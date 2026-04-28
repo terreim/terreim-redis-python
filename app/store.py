@@ -53,7 +53,6 @@ def lrange(key, start, stop) -> list[bytes]:
     
     return v.data[start:stop]
 
-
 def lpop(key, count=1) -> bytes | list[bytes] | None: # Implement later
     pass
 
