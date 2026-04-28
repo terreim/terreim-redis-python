@@ -5,6 +5,9 @@ from .exception import IncompleteData
 
 sel = selectors.DefaultSelector()
 data_buffer = {}
+get_dict = {
+    b'foo': b'bar'
+}
 
 def accept(sock: socket.socket, mask: int) -> None:
     conn, addr = sock.accept()
@@ -99,9 +102,13 @@ def read(conn: socket.socket, mask: int) -> None:
             case [b'ECHO', msg]:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
             case [b'SET', key, value]:
+                get_dict[key] = value
                 conn.sendall(b'+OK\r\n')
             case [b'GET', key]:
-                conn.sendall(b'$3\r\nbar\r\n')
+                if key in get_dict:
+                    conn.sendall(b'$' + str(len(get_dict[key])).encode() + b'\r\n' + get_dict[key] + b'\r\n')
+                else:
+                    conn.sendall(b'$-1\r\n')
             case _:
                 conn.sendall(b'-ERR unknown command\r\n')
 
