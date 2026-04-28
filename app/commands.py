@@ -45,6 +45,8 @@ def dispatch(command: list[bytes]) -> bytes:
             if stop_idx < 0:
                 if stop_idx == -1: stop_idx = list_len
                 else: stop_idx = list_len + stop_idx + 1
+            
+            stop_idx += 1
 
             if start_idx >= list_len or start_idx >= stop_idx:
                 return encode_array([])
