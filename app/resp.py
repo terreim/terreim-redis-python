@@ -1,6 +1,4 @@
 from .exception import IncompleteData
-from .store import sg_dict, RedisValue
-from datetime import datetime, timedelta
 
 class Decoder():
     def __init__(self, buf: bytes, pos: int):
@@ -69,57 +67,21 @@ class Decoder():
 
         return bytes(self.buffer[self.pos + 1:line_end]), line_end + 2
     
-class Encoder:
-    def __init__(self, element):
-        self.element = element
-
-    def encode_resp(self) -> bytes:
-        match self.element:
-            case [b'PING']:
-                return b'+PONG\r\n'
-
-            case [b'ECHO', msg]:
-                return self._encode_bulk_string(msg)
-
-            case [b'SET', key, value]:
-                sg_dict[key] = RedisValue(data=value, expires_at=None)
-                return b'+OK\r\n'
-
-            case [b'SET', key, value, options, rest]:
-                sg_dict[key] = RedisValue(data=value, expires_at=datetime.now() + timedelta(seconds=int(rest)) if options.upper() == b'EX' else datetime.now() + timedelta(milliseconds=int(rest)))
-                return b'+OK\r\n'
-                
-            case [b'GET', key]:
-                if key in sg_dict:
-                    redis_value = sg_dict[key]
-                    if redis_value.expires_at is None or redis_value.expires_at > datetime.now():
-                        return self._encode_bulk_string(redis_value.data)
-                    del sg_dict[key]
-                return self._encode_bulk_string(None)
-            
-            case [b'RPUSH', list, *value]:
-                if list not in sg_dict:
-                    sg_dict[list] = RedisValue(data=[], expires_at=None)
-                sg_dict[list].data.extend(value)
-                return self._encode_integer(len(sg_dict[list].data))
-            
-            case _:
-                return self._encode_error(b'ERR unknown command')
-            
-    def _encode_simple_string(self, s: bytes) -> bytes:
+class Encoder():
+    def encode_simple_string(s: bytes) -> bytes:
         return b'+' + s + b'\r\n'
 
-    def _encode_bulk_string(self, s: bytes | None) -> bytes:  # None → b"$-1\r\n"
+    def encode_bulk_string(s: bytes | None) -> bytes:
         if s is None:
             return b'$-1\r\n'
         return b'$' + str(len(s)).encode() + b'\r\n' + s + b'\r\n'
 
-    def _encode_array(self, items: list[bytes]) -> bytes:
-        pass
+    def encode_array(encoded_items: list[bytes]) -> bytes: # The caller does the encoding
+        return b'*' + str(len(encoded_items)).encode() + b'\r\n' + b''.join(encoded_items)
 
-    def _encode_integer(self, n: int) -> bytes:
+    def encode_integer(n: int) -> bytes:
         return b':' + str(n).encode() + b'\r\n'
 
-    def _encode_error(self, msg: bytes) -> bytes:
+    def encode_error(msg: bytes) -> bytes:
         return b'-' + msg + b'\r\n'
 

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from .exception import IncompleteData
 from .resp import Decoder, Encoder
+from .commands import dispatch
 
 sel = selectors.DefaultSelector()
 data_buffer = {}
@@ -39,8 +40,7 @@ def read(conn: socket.socket, mask: int) -> None:
 
         del buf[:consumed]
         
-        encoder = Encoder(element)
-        response = encoder.encode_resp()
+        response = dispatch(element)
         conn.sendall(response)
 
 def main():
