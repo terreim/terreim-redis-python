@@ -103,21 +103,20 @@ def read(conn: socket.socket, mask: int) -> None:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
 
             case [b'SET', key, value, options, rest]:
-                sg_dict[str(key)] = value
-                print(sg_dict)
+                sg_dict[key] = value
                 conn.sendall(b'+OK\r\n')
+
                 if options.upper() == b'EX':
                     time.sleep(int(rest))
-                    del sg_dict[str(key)]
+                    del sg_dict[key]
                 elif options.upper() == b'PX':
                     time.sleep(int(rest) / 1000)
-                    del sg_dict[str(key)]
+                    del sg_dict[key]
                 
             case [b'GET', key]:
-                if isinstance(key, bytes):
-                    print(f"GET command received for key: {key.decode()}")
-                if str(key) in sg_dict:
-                    conn.sendall(b'$' + str(len(sg_dict[str(key)])).encode() + b'\r\n' + sg_dict[str(key)] + b'\r\n')
+                print(sg_dict)
+                if key in sg_dict:
+                    conn.sendall(b'$' + str(len(sg_dict[key])).encode() + b'\r\n' + sg_dict[key] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
 
