@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from .resp import Encoder
 from .store import get_string, set_string, rpush, lpush, lrange, lpop, llen
 
-encoder = Encoder()
+encoder = Encoder
 
 def dispatch(command: list[bytes]) -> bytes:
     match command:

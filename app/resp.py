@@ -67,7 +67,7 @@ class Decoder():
 
         return bytes(self.buffer[self.pos + 1:line_end]), line_end + 2
     
-class Encoder():
+class Encoder:
     def encode_simple_string(s: bytes) -> bytes:
         return b'+' + s + b'\r\n'
 
