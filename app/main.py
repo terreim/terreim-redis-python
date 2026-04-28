@@ -3,7 +3,7 @@ import selectors
 from datetime import datetime, timedelta
 
 from .exception import IncompleteData
-from .resp import Decoder, Encoder
+from .resp import Decoder
 from .commands import dispatch
 
 sel = selectors.DefaultSelector()
