@@ -32,7 +32,7 @@ def read(conn: socket.socket, mask: int) -> None:
     while len(buf) > 0:
         try:
             decoder = Decoder(buf, 0)
-            element, consumed = decoder.decode()
+            element, consumed = decoder.decode_resp()
             print(f"Received element: {element}, consumed {consumed} bytes")
         except IncompleteData:
             break
@@ -40,7 +40,7 @@ def read(conn: socket.socket, mask: int) -> None:
         del buf[:consumed]
         
         encoder = Encoder(element)
-        response = encoder.encode()
+        response = encoder.encode_resp()
         conn.sendall(response)
 
 def main():
