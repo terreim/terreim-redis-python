@@ -67,21 +67,21 @@ class Decoder():
 
         return bytes(self.buffer[self.pos + 1:line_end]), line_end + 2
     
-class Encoder:
-    def encode_simple_string(s: bytes) -> bytes:
-        return b'+' + s + b'\r\n'
 
-    def encode_bulk_string(s: bytes | None) -> bytes:
-        if s is None:
-            return b'$-1\r\n'
-        return b'$' + str(len(s)).encode() + b'\r\n' + s + b'\r\n'
+def encode_simple_string(s: bytes) -> bytes:
+    return b'+' + s + b'\r\n'
 
-    def encode_array(encoded_items: list[bytes]) -> bytes: # The caller does the encoding
-        return b'*' + str(len(encoded_items)).encode() + b'\r\n' + b''.join(encoded_items)
+def encode_bulk_string(s: bytes | None) -> bytes:
+    if s is None:
+        return b'$-1\r\n'
+    return b'$' + str(len(s)).encode() + b'\r\n' + s + b'\r\n'
 
-    def encode_integer(n: int) -> bytes:
-        return b':' + str(n).encode() + b'\r\n'
+def encode_array(encoded_items: list[bytes]) -> bytes: # The caller does the encoding
+    return b'*' + str(len(encoded_items)).encode() + b'\r\n' + b''.join(encoded_items)
 
-    def encode_error(msg: bytes) -> bytes:
-        return b'-' + msg + b'\r\n'
+def encode_integer(n: int) -> bytes:
+    return b':' + str(n).encode() + b'\r\n'
+
+def encode_error(msg: bytes) -> bytes:
+    return b'-' + msg + b'\r\n'
 
