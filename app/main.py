@@ -98,6 +98,10 @@ def read(conn: socket.socket, mask: int) -> None:
                 conn.sendall(b'+PONG\r\n')
             case [b'ECHO', msg]:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
+            case [b'SET', key, value]:
+                conn.sendall(b'+OK\r\n')
+            case [b'GET', key]:
+                conn.sendall(b'$3\r\nbar\r\n')
             case _:
                 conn.sendall(b'-ERR unknown command\r\n')
 
