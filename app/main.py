@@ -1,13 +1,12 @@
 import socket  # noqa: F401
 import selectors
+import time
 
 from .exception import IncompleteData
 
 sel = selectors.DefaultSelector()
 data_buffer = {}
-get_dict = {
-    b'foo': b'bar'
-}
+setget_dict = {}
 
 def accept(sock: socket.socket, mask: int) -> None:
     conn, addr = sock.accept()
@@ -99,16 +98,26 @@ def read(conn: socket.socket, mask: int) -> None:
         match element:
             case [b'PING']:
                 conn.sendall(b'+PONG\r\n')
+
             case [b'ECHO', msg]:
                 conn.sendall(b"$" + str(len(msg)).encode() + b"\r\n" + msg + b"\r\n")
-            case [b'SET', key, value]:
-                get_dict[key] = value
+
+            case [b'SET', key, value, options, rest]:
+                setget_dict[key] = value
                 conn.sendall(b'+OK\r\n')
+                if options.upper() == b'EX':
+                    time.sleep(int(rest))
+                    del setget_dict[key]
+                elif options.upper() == b'PX':
+                    time.sleep(int(rest) / 1000)
+                    del setget_dict[key]
+                
             case [b'GET', key]:
-                if key in get_dict:
-                    conn.sendall(b'$' + str(len(get_dict[key])).encode() + b'\r\n' + get_dict[key] + b'\r\n')
+                if key in setget_dict:
+                    conn.sendall(b'$' + str(len(setget_dict[key])).encode() + b'\r\n' + setget_dict[key] + b'\r\n')
                 else:
                     conn.sendall(b'$-1\r\n')
+
             case _:
                 conn.sendall(b'-ERR unknown command\r\n')
 
